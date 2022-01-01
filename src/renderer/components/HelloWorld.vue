@@ -1,5 +1,8 @@
 <template>
   <div class="hello">
+    <button @click="readFile('./input.txt')">
+      READ FILE
+    </button>
     <h1>{{ msg }}</h1>
     <p>
       For a guide and recipes on how to configure / customize this project,<br/>
@@ -39,15 +42,13 @@ export default {
   props: {
     msg: String
   },
-  mounted() {
-    // handle reply from the backend
+  created() {
     window.ipc.on('READ_FILE', (payload) => {
       console.log(payload.content);
     });
   },
   methods: {
     readFile(path) {
-      // ask backend to read file
       const payload = {path};
       window.ipc.send('READ_FILE', payload);
     },

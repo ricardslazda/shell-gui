@@ -65,6 +65,6 @@ if (isDevelopment) {
 }
 
 ipcMain.on('READ_FILE', (event, payload) => {
-  const content = fs.readFileSync(payload.path);
+  const content = fs.readFileSync(payload.path, {encoding:'utf8', flag:'r'});
   event.reply('READ_FILE', { content });
 });
