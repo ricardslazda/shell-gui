@@ -15,5 +15,3 @@ contextBridge.exposeInMainWorld(
         },
     },
 );
-
-alert("preload");
