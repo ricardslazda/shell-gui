@@ -15,9 +15,7 @@ async function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
-      preload: path.resolve(__dirname, '../src/preload/preload.js')
+      preload: path.resolve(__static, 'preload.js')
     },
   })
 

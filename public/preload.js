@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const validChannels = ['READ_FILE', 'WRITE_FILE'];
+
 contextBridge.exposeInMainWorld(
     'ipc', {
         send: (channel, data) => {
@@ -16,4 +17,4 @@ contextBridge.exposeInMainWorld(
     },
 );
 
-alert("test");
+alert("preload");
