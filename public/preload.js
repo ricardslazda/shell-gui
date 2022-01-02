@@ -1,5 +1,5 @@
 const {contextBridge, ipcRenderer} = require('electron');
-const validChannels = ['READ_FILE', 'WRITE_FILE', "EXECUTE_SHELL_SCRIPT"];
+const validChannels = ['READ_FILE', 'WRITE_FILE', "EXECUTE_SHELL_SCRIPT", "KILL_SHELL_SCRIPT"];
 
 contextBridge.exposeInMainWorld(
     'ipc', {

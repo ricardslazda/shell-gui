@@ -8,7 +8,7 @@
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
-      <router-link to="/">
+      <router-link to="/" class="sidebar__link">
         <li class="nav-item">
           <a href="#" class="nav-link active" aria-current="page">
             <i class="fas fa-book"></i>

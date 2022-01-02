@@ -6,6 +6,9 @@
     <button @click="sendExecuteShellScriptEvent(file.path)">
       EXECUTE SHELL SCRIPT
     </button>
+    <button @click="sendKillShellScriptEvent()">
+      KILL SHELL SCRIPT
+    </button>
     <label class="file-select">
       <div class="select-button">
         <span v-if="file">Selected File: {{ file.name }}</span>
@@ -59,6 +62,9 @@ export default {
     sendExecuteShellScriptEvent(path) {
       const payload = {path};
       window.ipc.send('EXECUTE_SHELL_SCRIPT', payload);
+    },
+    sendKillShellScriptEvent() {
+      window.ipc.send('KILL_SHELL_SCRIPT');
     },
     handleFileUpload() {
       this.file = this.$refs.file.files[0];

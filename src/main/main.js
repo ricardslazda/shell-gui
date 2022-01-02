@@ -77,13 +77,14 @@ ipcMain.on('READ_FILE', (event, payload) => {
     event.reply('READ_FILE', {content});
 });
 
+let cmd;
 ipcMain.on('EXECUTE_SHELL_SCRIPT', (event, payload) => {
     if (!fs.existsSync(payload.path)) {
         event.reply('READ_FILE', {error: "File not found!"});
         return
     }
 
-    const cmd = cp.spawn(payload.path);
+    cmd = cp.spawn(payload.path);
     cmd.stdout.on('data', function (output) {
         event.reply('EXECUTE_SHELL_SCRIPT', {output: output.toString()});
     });
@@ -95,4 +96,9 @@ ipcMain.on('EXECUTE_SHELL_SCRIPT', (event, payload) => {
     cmd.stderr.on('data', function (err) {
         console.log(err);
     });
+});
+
+ipcMain.on('KILL_SHELL_SCRIPT', () => {
+    cmd.kill();
+    console.log("Killed")
 });
