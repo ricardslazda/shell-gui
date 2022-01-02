@@ -1,13 +1,12 @@
 const path = require('path');
 const fs = require('fs');
+const cp = require('child_process');
 import {app, protocol, BrowserWindow, ipcMain} from 'electron'
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS3_DEVTOOLS} from 'electron-devtools-installer'
-
 import {AppDAO} from "./dao";
 
 const dao = new AppDAO("./database.sqlite3")
-
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 protocol.registerSchemesAsPrivileged([
@@ -71,9 +70,29 @@ if (isDevelopment) {
 
 ipcMain.on('READ_FILE', (event, payload) => {
     if (!fs.existsSync(payload.path)) {
-        console.log("File not found");
-    } else {
-        const content = fs.readFileSync(payload.path, {encoding: 'utf8', flag: 'r'});
-        event.reply('READ_FILE', {content});
+        event.reply('READ_FILE', {error: "File not found!"});
+        return
     }
+    const content = fs.readFileSync(payload.path, {encoding: 'utf8', flag: 'r'});
+    event.reply('READ_FILE', {content});
+});
+
+ipcMain.on('EXECUTE_SHELL_SCRIPT', (event, payload) => {
+    if (!fs.existsSync(payload.path)) {
+        event.reply('READ_FILE', {error: "File not found!"});
+        return
+    }
+
+    const cmd = cp.spawn(payload.path);
+    cmd.stdout.on('data', function (output) {
+        event.reply('EXECUTE_SHELL_SCRIPT', {output: output.toString()});
+    });
+
+    cmd.on('close', function () {
+        console.log('Finished');
+    });
+
+    cmd.stderr.on('data', function (err) {
+        console.log(err);
+    });
 });

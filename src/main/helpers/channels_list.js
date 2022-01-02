@@ -1,0 +1,9 @@
+const READ_FILE = "READ_FILE";
+const WRITE_FILE = "WRITE_FILE";
+const EXECUTE_SHELL_SCRIPT = "EXECUTE_SHELL_SCRIPT";
+
+module.exports = {
+    READ_FILE,
+    WRITE_FILE,
+    EXECUTE_SHELL_SCRIPT,
+};
