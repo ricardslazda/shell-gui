@@ -1,7 +1,7 @@
 <template>
   <div class="app-wrapper d-flex flex-row">
     <sidebar/>
-    <router-view />
+    <router-view/>
   </div>
 </template>
 <script>
@@ -13,7 +13,7 @@ export default {
 </script>
 
 <style lang="scss">
-  .app-wrapper {
-    height: 100%;
-  }
+.app-wrapper {
+  height: 100%;
+}
 </style>

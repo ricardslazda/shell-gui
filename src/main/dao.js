@@ -17,7 +17,7 @@ export class AppDAO {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({ id: this.lastID })
+                    resolve({id: this.lastID})
                 }
             })
         })
