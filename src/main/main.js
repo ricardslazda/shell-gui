@@ -6,6 +6,10 @@ import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS3_DEVTOOLS} from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+const userDataPath = app.getPath('userData');
+const databaseFileName = "database.sqlite";
+const databasePath = path.join(userDataPath, databaseFileName)
+
 protocol.registerSchemesAsPrivileged([
     {scheme: 'app', privileges: {secure: true, standard: true}}
 ])
@@ -15,7 +19,8 @@ async function createWindow() {
         width: 1000,
         height: 2000,
         webPreferences: {
-            preload: path.resolve(__static, 'preload.js')
+            preload: path.resolve(__static, 'preload.js'),
+            additionalArguments: [databasePath]
         },
     })
 
@@ -49,6 +54,7 @@ app.on('ready', async () => {
         }
     }
     await createWindow()
+    global.databasePath = databasePath;
 })
 
 if (isDevelopment) {
@@ -98,4 +104,15 @@ ipcMain.on('EXECUTE_SHELL_SCRIPT', (event, payload) => {
 ipcMain.on('KILL_SHELL_SCRIPT', () => {
     cmd.kill();
     console.log("Killed")
+});
+
+fs.exists(databasePath, function (exists) {
+    if (exists) {
+        console.log("Database file found!")
+    } else {
+        fs.writeFile(databasePath, '', function (err) {
+            if (err) throw err;
+            console.log('Database file is created successfully.');
+        });
+    }
 });

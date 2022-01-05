@@ -66,8 +66,8 @@ export default {
     sendKillShellScriptEvent() {
       window.ipc.send('KILL_SHELL_SCRIPT');
     },
-    testDb() {
-      window.ShellScripts.addScript();
+    handleFileUpload() {
+      this.file = this.$refs.file.files[0];
     }
   }
 }

@@ -2,6 +2,14 @@ const {contextBridge, ipcRenderer} = require('electron');
 const validChannels = ['READ_FILE', 'WRITE_FILE', "EXECUTE_SHELL_SCRIPT", "KILL_SHELL_SCRIPT"];
 const sqlite3 = require('sqlite3');
 
+const database = new sqlite3.Database(window.process.argv.slice(-1).pop(), (err) => {
+    if (err) {
+        console.log('Could not connect to database', err)
+    } else {
+        console.log('Connected to database!')
+    }
+})
+
 contextBridge.exposeInMainWorld(
     'ipc', {
         send: (channel, data) => {
@@ -19,17 +27,14 @@ contextBridge.exposeInMainWorld(
 
 contextBridge.exposeInMainWorld(
     'sqlite3', {
-        run: (command) => {
-            sqlite3.run(command);
+        run: (sql, params = [], callback = null) => {
+            database.run(sql, params, callback);
         },
-        database: (databaseFilePath) => {
-            new sqlite3.Database(databaseFilePath, (err) => {
-                if (err) {
-                    console.log('Could not connect to database', err)
-                } else {
-                    console.log('Connected to database')
-                }
-            })
+        get: (sql, params = [], callback = null) => {
+            database.get(sql, params, callback);
+        },
+        all: (sql, params = [], callback = null) => {
+            database.all(sql, params, callback);
         }
     },
 );

@@ -1,6 +1,8 @@
+import {Dao} from "../dao";
+
 export class ShellScriptRepository {
-    constructor(dao) {
-        this.db = dao;
+    constructor() {
+        this.dao = new Dao;
     }
 
     createTable() {
@@ -16,12 +18,16 @@ export class ShellScriptRepository {
                 TEXT
             )`
 
-        return this.db.run(sql)
+        return this.dao.run(sql)
     }
 
     createRecord(path) {
-        return this.db.run(
+        return this.dao.run(
             'INSERT INTO shell_scripts (path) VALUES (?)',
             [path])
+    }
+
+    getScripts() {
+        return this.dao.all('SELECT * FROM shell_scripts');
     }
 }
