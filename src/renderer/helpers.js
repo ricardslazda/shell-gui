@@ -1,3 +1,5 @@
+import { camelCase } from 'lodash';
+
 export function snakeToCamel(obj) {
     if (Array.isArray(obj)) {
         return obj.map(v => snakeToCamel(v));
@@ -5,7 +7,7 @@ export function snakeToCamel(obj) {
         return Object.keys(obj).reduce(
             (result, key) => ({
                 ...result,
-                [snakeToCamel(key)]: snakeToCamel(obj[key]),
+                [camelCase(key)]: snakeToCamel(obj[key]),
             }),
             {},
         );
