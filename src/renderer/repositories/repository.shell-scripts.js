@@ -1,33 +1,26 @@
-import {Dao} from "../dao";
+export function createTable()
+{
+    const sql = `
+        CREATE TABLE IF NOT EXISTS shell_scripts
+        (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_path TEXT NOT NULL,
+            script_name TEXT NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            last_executed_at TIMESTAMP
+        )`
 
-export class ShellScriptRepository {
-    constructor() {
-        this.dao = new Dao;
-    }
+    return window.dao.run(sql)
+}
 
-    createTable() {
-        const sql = `
-            CREATE TABLE IF NOT EXISTS shell_scripts
-            (
-                id
-                INTEGER
-                PRIMARY
-                KEY
-                AUTOINCREMENT,
-                path
-                TEXT
-            )`
+export function createRecord(filePath, scriptName)
+{
+    return window.dao.run(
+        'INSERT INTO shell_scripts (file_path, script_name) VALUES (?,?)',
+        [filePath, scriptName])
+}
 
-        return this.dao.run(sql)
-    }
-
-    createRecord(path) {
-        return this.dao.run(
-            'INSERT INTO shell_scripts (path) VALUES (?)',
-            [path])
-    }
-
-    getScripts() {
-        return this.dao.all('SELECT * FROM shell_scripts');
-    }
+export function getScripts()
+{
+    return window.dao.all('SELECT * FROM shell_scripts');
 }

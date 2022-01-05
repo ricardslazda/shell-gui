@@ -1,73 +1,55 @@
 <template>
-  <div>
-    <button @click="sendReadFileEvent(file.path)">
-      READ FILE
-    </button>
-    <button @click="sendExecuteShellScriptEvent(file.path)">
-      EXECUTE SHELL SCRIPT
-    </button>
-    <button @click="sendKillShellScriptEvent()">
-      KILL SHELL SCRIPT
-    </button>
-    <label class="file-select">
-      <div class="select-button">
-        <span v-if="file">Selected File: {{ file.name }}</span>
-        <span v-else>Select File</span>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addShellScriptModal">Add Script</button>
       </div>
-      <input type="file" ref="file" @change="handleFileUpload()"/>
-    </label>
-    <h1>Home page</h1>
-    <div>
-      shell output
-      <p>
-        {{this.shellScriptOutput}}
-      </p>
     </div>
+  </div>
+  <div class="row">
+    <div class="col-4">
+      <div>
+        <div v-for="script in scripts" v-bind:key="script.id">
+          <p>
+            {{ script.filePath }}
+          </p>
+          <p>
+            {{ script.scriptName }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <AddShellScript @script-saved="handleScriptSaved"/>
   </div>
 </template>
 
 <script>
+import * as shellScriptRepository from "../repositories/repository.shell-scripts";
+import AddShellScript from "./shell-scripts/Add-Shell-Script";
+
 export default {
-  name: 'Home',
+  name: "Home",
+  components: {
+    AddShellScript
+  },
   data() {
     return {
-      file: Object,
-      shellScriptOutput: String,
+      scripts: Array
     }
   },
-  created() {
-    this.setReadFileEventHandler();
-    this.setExecuteShellScriptHandler();
+  mounted() {
+    this.getScripts();
   },
   methods: {
-    setReadFileEventHandler() {
-      window.ipc.on('READ_FILE', (payload) => {
-        if (payload.error) {
-          alert(payload.error);
-          return;
-        }
-
-        console.log(payload.content);
-      });
+    handleScriptSaved(data) {
+      console.log(data)
+      shellScriptRepository.createRecord(data.filePath, data.scriptName);
+      this.getScripts();
     },
-    sendReadFileEvent(path) {
-      const payload = {path};
-      window.ipc.send('READ_FILE', payload);
-    },
-    setExecuteShellScriptHandler() {
-      window.ipc.on('EXECUTE_SHELL_SCRIPT', (payload) => {
-        this.shellScriptOutput += payload.output;
-      });
-    },
-    sendExecuteShellScriptEvent(path) {
-      const payload = {path};
-      window.ipc.send('EXECUTE_SHELL_SCRIPT', payload);
-    },
-    sendKillShellScriptEvent() {
-      window.ipc.send('KILL_SHELL_SCRIPT');
-    },
-    handleFileUpload() {
-      this.file = this.$refs.file.files[0];
+    getScripts() {
+      shellScriptRepository.getScripts().then((res) => this.scripts = res);
     }
   }
 }

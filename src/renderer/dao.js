@@ -1,3 +1,5 @@
+import {snakeToCamel} from "./helpers";
+
 export class Dao {
     run(sql, params = []) {
         return new Promise((resolve, reject) => {
@@ -19,7 +21,7 @@ export class Dao {
                     console.log(err)
                     reject(err)
                 } else {
-                    resolve(result)
+                    resolve(snakeToCamel(result))
                 }
             })
         })
@@ -33,7 +35,7 @@ export class Dao {
                     console.log(err)
                     reject(err)
                 } else {
-                    resolve(rows)
+                    resolve(snakeToCamel(rows))
                 }
             })
         })
