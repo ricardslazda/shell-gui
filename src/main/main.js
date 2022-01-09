@@ -1,9 +1,11 @@
 const path = require('path');
 const fs = require('fs');
-const cp = require('child_process');
-import {app, protocol, BrowserWindow, ipcMain} from 'electron'
+import {app, protocol, BrowserWindow} from 'electron'
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS3_DEVTOOLS} from 'electron-devtools-installer'
+import {setExecuteShellScriptListener, setStopShellScriptListener} from "./eventListeners/event-listener.shell-scripts";
+import {setReadFileListener} from "./eventListeners/event-listener.files";
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const userDataPath = app.getPath('userData');
@@ -29,14 +31,12 @@ async function createWindow() {
         if (!process.env.IS_TEST) win.webContents.openDevTools()
     } else {
         createProtocol('app')
-        // Load the index.html when not in development
         win.loadURL('app://./index.html')
     }
 }
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
-        // database.close();
         app.quit()
     }
 })
@@ -54,7 +54,7 @@ app.on('ready', async () => {
         }
     }
     await createWindow()
-    global.databasePath = databasePath;
+    await loadDatabaseFile();
 })
 
 if (isDevelopment) {
@@ -71,48 +71,20 @@ if (isDevelopment) {
     }
 }
 
-ipcMain.on('READ_FILE', (event, payload) => {
-    if (!fs.existsSync(payload.path)) {
-        event.reply('READ_FILE', {error: "File not found!"});
-        return
-    }
-    const content = fs.readFileSync(payload.path, {encoding: 'utf8', flag: 'r'});
-    event.reply('READ_FILE', {content});
-});
+let runningScripts = [];
+setStopShellScriptListener(runningScripts);
+setExecuteShellScriptListener(runningScripts);
+setReadFileListener();
 
-let cmd;
-ipcMain.on('EXECUTE_SHELL_SCRIPT', (event, payload) => {
-    if (!fs.existsSync(payload.path)) {
-        event.reply('READ_FILE', {error: "File not found!"});
-        return
-    }
-
-    cmd = cp.spawn(payload.path);
-    cmd.stdout.on('data', function (output) {
-        event.reply('EXECUTE_SHELL_SCRIPT', {output: output.toString()});
+function loadDatabaseFile() {
+    fs.exists(databasePath, function (exists) {
+        if (exists) {
+            console.log("Database file found!")
+        } else {
+            fs.writeFile(databasePath, '', function (err) {
+                if (err) throw err;
+                console.log('Database file is created successfully.');
+            });
+        }
     });
-
-    cmd.on('close', function () {
-        console.log('Finished');
-    });
-
-    cmd.stderr.on('data', function (err) {
-        console.log(err);
-    });
-});
-
-ipcMain.on('KILL_SHELL_SCRIPT', () => {
-    cmd.kill();
-    console.log("Killed")
-});
-
-fs.exists(databasePath, function (exists) {
-    if (exists) {
-        console.log("Database file found!")
-    } else {
-        fs.writeFile(databasePath, '', function (err) {
-            if (err) throw err;
-            console.log('Database file is created successfully.');
-        });
-    }
-});
+}

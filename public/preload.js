@@ -1,5 +1,5 @@
 const {contextBridge, ipcRenderer} = require('electron');
-const validChannels = ['READ_FILE', 'WRITE_FILE', "EXECUTE_SHELL_SCRIPT", "KILL_SHELL_SCRIPT"];
+const validChannels = ['READ_FILE', 'WRITE_FILE', "EXECUTE_SHELL_SCRIPT", "STOP_SHELL_SCRIPT"];
 const sqlite3 = require('sqlite3');
 
 const database = new sqlite3.Database(window.process.argv.slice(-1).pop(), (err) => {

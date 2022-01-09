@@ -1,3 +1,5 @@
+import {ShellScript} from "@/models/models.shell-script";
+
 export function createTable()
 {
     const sql = `
@@ -6,6 +8,7 @@ export function createTable()
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             file_path TEXT NOT NULL,
             script_name TEXT NOT NULL,
+            status INTEGER DEFAULT 0,
             added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             last_executed_at TIMESTAMP
         )`
@@ -13,14 +16,26 @@ export function createTable()
     return window.dao.run(sql)
 }
 
-export function createRecord(filePath, scriptName)
+export function createRecord(shellScript)
 {
     return window.dao.run(
         'INSERT INTO shell_scripts (file_path, script_name) VALUES (?,?)',
-        [filePath, scriptName])
+        [shellScript.filePath, shellScript.scriptName])
 }
 
 export function getScripts()
 {
-    return window.dao.all('SELECT * FROM shell_scripts');
+    let scriptsArray = [];
+    return window.dao.all('SELECT * FROM shell_scripts').then((scripts) => {
+        scripts.forEach(script => {
+            scriptsArray.push(new ShellScript({
+                id: script.id,
+                scriptName: script.scriptName,
+                filePath: script.filePath,
+                createdAt: script.createdAt
+            }))
+        })
+
+        return scriptsArray;
+    });
 }
