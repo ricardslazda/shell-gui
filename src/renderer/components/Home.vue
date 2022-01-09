@@ -100,23 +100,19 @@ export default {
       shellScriptRepository.getScripts().then(res => this.scripts = res);
     },
     executeScript(script) {
-      shellScriptEventHandler.sendExecuteShellScriptEvent({
-        "scriptId": script.id,
-        "path": script.filePath,
-      })
+      if (this.canBeExecuted(script.status)) {
+        shellScriptEventHandler.sendExecuteShellScriptEvent({
+          "scriptId": script.id,
+          "path": script.filePath,
+        })
+      }
     },
     stopScript(script) {
-      shellScriptEventHandler.sendKillShellScriptEvent({
-        "scriptId": script.id,
-      });
-
-      let index = this.scripts.findIndex(dataScript => dataScript.id === script.id);
-      if (!this.scripts[index]) {
-        console.log("Script not found!");
-        return;
+      if (this.canBeStopped(script.status)) {
+        shellScriptEventHandler.sendKillShellScriptEvent({
+          "scriptId": script.id,
+        });
       }
-
-      this.scripts[index].isStopping = true;
     },
     isStopping(status) {
       return status === ShellScript.STATUS_STOPPING;
@@ -130,6 +126,12 @@ export default {
       }
 
       return script;
+    },
+    canBeExecuted(status) {
+      return status !== ShellScript.STATUS_EXECUTING && status !== ShellScript.STATUS_STOPPING;
+    },
+    canBeStopped(status) {
+      return status === ShellScript.STATUS_EXECUTING;
     }
   }
 }
