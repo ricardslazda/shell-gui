@@ -16,7 +16,8 @@
               <button type="button" class="btn btn-primary" @click="executeScript(script)">
                 Run
               </button>
-              <button type="button" :class="['btn btn-danger', {'disabled' : isStopping(script.status)}]" @click="stopScript(script)">
+              <button type="button" :class="['btn btn-danger', {'disabled' : isStopping(script.status)}]"
+                      @click="stopScript(script)">
                 Stop
               </button>
             </div>
@@ -53,49 +54,39 @@ export default {
   },
   mounted() {
     shellScriptEventHandler.handleExecuteShellScriptResponse(function (payload) {
-      let index = this.scripts.findIndex(script => script.id === payload.scriptId);
+      let script = this.getScript(payload.scriptId);
 
       if (payload.error) {
         console.log(payload.error);
         return;
       }
 
-      if (!this.scripts[index]) {
-        console.log("Script not found!");
-        return;
-      }
-
-      this.scripts[index].status = ShellScript.STATUS_EXECUTING;
+      script.status = ShellScript.STATUS_EXECUTING;
 
       if (payload.output) {
-        this.scripts[index].output += payload.output;
+        script.output += payload.output;
       }
 
       if (payload.hasExecuted) {
-        this.scripts[index].output = "Executed";
-        this.scripts[index].status = ShellScript.STATUS_EXECUTED;
+        script.output = "Executed";
+        script.status = ShellScript.STATUS_EXECUTED;
       }
 
       if (payload.isKilled) {
-        this.scripts[index].output = "Stopped";
-        this.scripts[index].status = ShellScript.STATUS_STOPPED;
+        script.output = "Stopped";
+        script.status = ShellScript.STATUS_STOPPED;
       }
     }.bind(this));
 
     shellScriptEventHandler.handleKillShellScriptResponse(function (payload) {
-      let index = this.scripts.findIndex(script => script.id === payload.scriptId);
-
-      if (!this.scripts[index]) {
-        console.log("Script not found!");
-        return;
-      }
+      let script = this.getScript(payload.scriptId);
 
       if (payload.error) {
         console.log(payload.error);
         return;
       }
 
-      this.scripts[index].status = ShellScript.STATUS_STOPPING;
+      script.status = ShellScript.STATUS_STOPPING;
     }.bind(this));
 
     this.getScripts();
@@ -129,6 +120,16 @@ export default {
     },
     isStopping(status) {
       return status === ShellScript.STATUS_STOPPING;
+    },
+    getScript(id) {
+      let script = this.scripts.find(script => script.id === id);
+
+      if (!script) {
+        console.log("Script not found!");
+        return;
+      }
+
+      return script;
     }
   }
 }
