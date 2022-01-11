@@ -16,17 +16,22 @@ export function createTable()
     return window.dao.run(sql)
 }
 
-export function createRecord(shellScript)
+export function createRecord(filePath, scriptName)
 {
+    let shellScript = new ShellScript({
+        filePath: filePath,
+        scriptName: scriptName,
+    });
+
     return window.dao.run(
         'INSERT INTO shell_scripts (file_path, script_name) VALUES (?,?)',
         [shellScript.filePath, shellScript.scriptName])
 }
 
-export function getScripts()
+export async function getScripts()
 {
     let scriptsArray = [];
-    return window.dao.all('SELECT * FROM shell_scripts').then((scripts) => {
+    return await window.dao.all('SELECT * FROM shell_scripts').then((scripts) => {
         scripts.forEach(script => {
             scriptsArray.push(new ShellScript({
                 id: script.id,

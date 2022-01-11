@@ -27,7 +27,7 @@ contextBridge.exposeInMainWorld(
 
 contextBridge.exposeInMainWorld(
     'sqlite3', {
-        run: (sql, params = [], callback = null) => {
+        run: (sql, params, callback = null) => {
             database.run(sql, params, callback);
         },
         get: (sql, params = [], callback = null) => {

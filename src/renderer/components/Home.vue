@@ -1,4 +1,4 @@
-<template>
+<template ref="homeRef">
   <div class="container">
     <div class="row">
       <div class="col-4">
@@ -16,7 +16,7 @@
               <button type="button" class="btn btn-primary" @click="executeScript(script)">
                 Run
               </button>
-              <button type="button" :class="['btn btn-danger', {'disabled' : isStopping(script.status)}]"
+              <button type="button" :class="['btn btn-danger', {'disabled' : script.isStopping()}]"
                       @click="stopScript(script)">
                 Stop
               </button>
@@ -29,6 +29,9 @@
           Add Script
         </button>
       </div>
+      <p v-if="this.error">
+        {{ this.error }}
+      </p>
     </div>
   </div>
   <div>
@@ -50,45 +53,12 @@ export default {
   data() {
     return {
       scripts: [],
+      error: ""
     }
   },
   mounted() {
-    shellScriptEventHandler.handleExecuteShellScriptResponse(function (payload) {
-      let script = this.getScript(payload.scriptId);
-
-      if (payload.error) {
-        console.log(payload.error);
-        return;
-      }
-
-      script.status = ShellScript.STATUS_EXECUTING;
-
-      if (payload.output) {
-        script.output += payload.output;
-      }
-
-      if (payload.hasExecuted) {
-        script.output = "Executed";
-        script.status = ShellScript.STATUS_EXECUTED;
-      }
-
-      if (payload.isKilled) {
-        script.output = "Stopped";
-        script.status = ShellScript.STATUS_STOPPED;
-      }
-    }.bind(this));
-
-    shellScriptEventHandler.handleKillShellScriptResponse(function (payload) {
-      let script = this.getScript(payload.scriptId);
-
-      if (payload.error) {
-        console.log(payload.error);
-        return;
-      }
-
-      script.status = ShellScript.STATUS_STOPPING;
-    }.bind(this));
-
+    shellScriptEventHandler.onExecuteShellScript(this.executeShellScriptCallback())
+    shellScriptEventHandler.onKillShellScript(this.killShellScriptCallback());
     this.getScripts();
   },
   methods: {
@@ -96,42 +66,77 @@ export default {
       shellScriptRepository.createRecord(data.filePath, data.scriptName);
       this.getScripts();
     },
-    getScripts() {
-      shellScriptRepository.getScripts().then(res => this.scripts = res);
+    async getScripts() {
+      this.scripts = await shellScriptRepository.getScripts();
     },
     executeScript(script) {
-      if (this.canBeExecuted(script.status)) {
-        shellScriptEventHandler.sendExecuteShellScriptEvent({
+      if (script.canBeExecuted()) {
+        shellScriptEventHandler.sendExecuteShellScript({
           "scriptId": script.id,
           "path": script.filePath,
         })
       }
     },
     stopScript(script) {
-      if (this.canBeStopped(script.status)) {
-        shellScriptEventHandler.sendKillShellScriptEvent({
+      if (script.canBeStopped()) {
+        shellScriptEventHandler.sendKillShellScript({
           "scriptId": script.id,
         });
       }
-    },
-    isStopping(status) {
-      return status === ShellScript.STATUS_STOPPING;
     },
     getScript(id) {
       let script = this.scripts.find(script => script.id === id);
 
       if (!script) {
-        console.log("Script not found!");
+        this.showError("Script not found!")
+
         return;
       }
 
       return script;
     },
-    canBeExecuted(status) {
-      return status !== ShellScript.STATUS_EXECUTING && status !== ShellScript.STATUS_STOPPING;
+    executeShellScriptCallback() {
+      return payload => {
+        let script = this.getScript(payload.scriptId);
+
+        if (payload.error) {
+          this.showError(payload.error);
+
+          return;
+        }
+
+        script.status = ShellScript.STATUS_EXECUTING;
+
+        if (payload.output) {
+          script.output += payload.output;
+        }
+
+        if (payload.hasExecuted) {
+          script.output = "Executed";
+          script.status = ShellScript.STATUS_EXECUTED;
+        }
+
+        if (payload.isKilled) {
+          script.output = "Stopped";
+          script.status = ShellScript.STATUS_STOPPED;
+        }
+      }
     },
-    canBeStopped(status) {
-      return status === ShellScript.STATUS_EXECUTING;
+    killShellScriptCallback() {
+      return payload => {
+        let script = this.getScript(payload.scriptId);
+
+        if (payload.error) {
+          this.showError(payload.error);
+
+          return;
+        }
+
+        script.status = ShellScript.STATUS_STOPPING;
+      }
+    },
+    showError(error) {
+      this.error = error;
     }
   }
 }

@@ -13,6 +13,16 @@ export class ShellScript {
     static STATUS_STOPPING = 3;
     static STATUS_STOPPED = 4;
 
+    static STATUSES_FOR_EXECUTION = [
+        this.STATUS_IDLE,
+        this.STATUS_STOPPED,
+        this.STATUS_EXECUTED
+    ];
+
+    static STATUSES_FOR_STOPPING = [
+        this.STATUS_EXECUTING
+    ];
+
     /** Additional Properties **/
     output = "";
     processId = "";
@@ -23,5 +33,17 @@ export class ShellScript {
         this.filePath = properties.filePath;
         this.createdAt = properties.createdAt;
         this.lastExecutedAt = properties.lastExecutedAt;
+    }
+
+    canBeExecuted() {
+        return ShellScript.STATUSES_FOR_EXECUTION.includes(this.status);
+    }
+
+    canBeStopped() {
+        return ShellScript.STATUSES_FOR_STOPPING.includes(this.status);
+    }
+
+    isStopping() {
+        return this.status === ShellScript.STATUS_STOPPING;
     }
 }
