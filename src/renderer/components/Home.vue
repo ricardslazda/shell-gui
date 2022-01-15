@@ -20,6 +20,9 @@
                       @click="stopScript(script)">
                 Stop
               </button>
+              <button class="btn btn-info" @click="editScript(script)">
+                Edit
+              </button>
             </div>
           </div>
         </div>
@@ -42,8 +45,8 @@
 <script>
 import * as shellScriptRepository from "@/repositories/repository.shell-scripts";
 import * as shellScriptEventHandler from "@/eventHandlers/event-handler.shell-script";
-import AddShellScript from "@/components/shell-scripts/Add-Shell-Script";
-import {ShellScript} from "@/models/models.shell-script";
+import AddShellScript from "@/components/shell-scripts/Add-Edit-Shell-Script";
+import {STATUS} from "@/models/models.shell-script";
 
 export default {
   name: "Home",
@@ -62,8 +65,8 @@ export default {
     this.getScripts();
   },
   methods: {
-    saveScript(data) {
-      shellScriptRepository.createRecord(data.filePath, data.scriptName);
+    saveScript(script) {
+      shellScriptRepository.createRecord(script.filePath, script.scriptName);
       this.getScripts();
     },
     async getScripts() {
@@ -105,7 +108,7 @@ export default {
           return;
         }
 
-        script.status = ShellScript.STATUS_EXECUTING;
+        script.status = STATUS.EXECUTING;
 
         if (payload.output) {
           script.output += payload.output;
@@ -113,12 +116,12 @@ export default {
 
         if (payload.hasExecuted) {
           script.output = "Executed";
-          script.status = ShellScript.STATUS_EXECUTED;
+          script.status = STATUS.EXECUTED;
         }
 
         if (payload.isKilled) {
           script.output = "Stopped";
-          script.status = ShellScript.STATUS_STOPPED;
+          script.status = STATUS.STOPPED;
         }
       }
     },
@@ -132,11 +135,14 @@ export default {
           return;
         }
 
-        script.status = ShellScript.STATUS_STOPPING;
+        script.status = STATUS.STOPPING;
       }
     },
     showError(error) {
       this.error = error;
+    },
+    editScript(script) {
+      return script;
     }
   }
 }
