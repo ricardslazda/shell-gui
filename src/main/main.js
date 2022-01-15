@@ -18,12 +18,13 @@ protocol.registerSchemesAsPrivileged([
 
 async function createWindow() {
     const win = new BrowserWindow({
-        width: 1000,
-        height: 2000,
+        width: 1400,
+        height: 700,
         webPreferences: {
             preload: path.resolve(__static, 'preload.js'),
             additionalArguments: [databasePath]
         },
+        titleBarStyle: 'hidden'
     })
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {

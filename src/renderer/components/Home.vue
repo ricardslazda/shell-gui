@@ -1,5 +1,5 @@
 <template>
-  <div id="content">
+  <div id="content" style="background: #F9F9FC">
   </div>
 </template>
 
@@ -157,7 +157,7 @@
 #content {
   width: 100%;
   padding: 0;
-  min-height: 100vh;
+  min-height: calc(100vh - 30px);
   transition: all 0.3s;
 }
 </style>
