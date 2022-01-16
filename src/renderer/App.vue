@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="content">
     <menubar/>
     <div class="app-wrapper d-flex flex-row">
       <sidebar/>
@@ -17,7 +17,18 @@ export default {
 </script>
 
 <style lang="scss">
+p,a,h1,h2,h3,body {
+  font-family: "Lato", sans-serif;
+}
+#content {
+  width: 100%;
+  padding: 0;
+  min-height: calc(100vh - 30px);
+  transition: all 0.3s;
+  background: #F9F9FC;
+}
+
 .app-wrapper {
-  height: 100%;
+  min-height: calc(100vh - 30px);
 }
 </style>

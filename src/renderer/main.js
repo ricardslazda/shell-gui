@@ -7,8 +7,8 @@ import {Dao} from "./dao";
 window.dao = new Dao();
 
 import * as shellScriptRepository from "./repositories/repository.shell-scripts";
-import * as shellScriptArgumentRepository from "./repositories/repository.shell-script-arguments";
-import * as shellScriptFlagRepository from "./repositories/repository.shell-script-flags";
+import * as shellScriptArgumentRepository from "./repositories/repository.script-arguments";
+import * as shellScriptOutputRepository from "./repositories/repository.script-output";
 
 setupDatabase(() => {
     createApp(App).use(router).mount('#app')
@@ -17,7 +17,7 @@ setupDatabase(() => {
 async function setupDatabase(initVue) {
     await shellScriptRepository.createTable()
         .then(() => shellScriptArgumentRepository.createTable())
-        .then(() => shellScriptFlagRepository.createTable())
+        .then(() => shellScriptOutputRepository.createTable())
         .catch((err) => console.log(err));
 
     initVue();

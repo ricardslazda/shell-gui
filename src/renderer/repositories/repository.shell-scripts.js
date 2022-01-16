@@ -16,16 +16,16 @@ export function createTable()
     return window.dao.run(sql)
 }
 
-export function createRecord(filePath, scriptName)
+export async function createRecord(script)
 {
-    let shellScript = new ShellScript({
-        filePath: filePath,
-        scriptName: scriptName,
-    });
-
-    return window.dao.run(
+    console.log(script);
+    return await window.dao.run(
         'INSERT INTO shell_scripts (file_path, script_name) VALUES (?,?)',
-        [shellScript.filePath, shellScript.scriptName])
+        [script.filePath, script.scriptName])
+}
+
+export async function getLastRowId() {
+    return await window.dao.all('SELECT last_insert_rowid();');
 }
 
 export async function getScripts()

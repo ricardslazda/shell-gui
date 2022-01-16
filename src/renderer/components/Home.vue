@@ -1,13 +1,12 @@
 <template>
-  <div id="content">
-    <div class="container">
-      <p class="script__title">
+    <div class="container home">
+      <h3 class="script__title">
         Scripts
-      </p>
-      <div class="script-container">
+      </h3>
+      <div class="script-container mb-3" v-for="script in scripts" v-bind:key="script.id">
         <div class="script__name">
           <p class="script__name-text">
-            Run my script
+            {{ script.scriptName }}
           </p>
         </div>
         <div class="script__actions">
@@ -15,13 +14,13 @@
             <div>
               <p class="script__status-badge">
                 <i class="fas fa-check-circle script__status-badge-icon"></i>
-                Executed
+                {{ script.getStatusByName() }}
               </p>
             </div>
           </div>
           <div class="script__actions-container">
-            <a href="#" class="script__actions-icon">
-              <i class="fas fa-pen"></i>
+            <a href="#" class="script__actions-icon" data-bs-toggle="modal" data-bs-target="#scriptOutput">
+              <i class="fas fa-table"></i>
             </a>
             <a href="#" class="script__actions-icon">
               <i class="fas fa-play"></i>
@@ -30,8 +29,12 @@
         </div>
       </div>
     </div>
+  <router-link to="/add-edit-shell-script">
+    <a href="#" class="btn-circle"></a>
+  </router-link>
+  <div>
+    <Output/>
   </div>
-  <a href="#" class="btn-circle"></a>
 </template>
 
 <!--<template>-->
@@ -80,123 +83,126 @@
 <!--  </div>-->
 <!--</template>-->
 
-<!--<script>-->
-<!--import * as shellScriptRepository from "@/repositories/repository.shell-scripts";-->
-<!--import * as shellScriptEventHandler from "@/eventHandlers/event-handler.shell-script";-->
-<!--import AddShellScript from "@/components/shell-scripts/Add-Edit-Shell-Script";-->
-<!--import {STATUS} from "@/models/models.shell-script";-->
+<script>
+import * as shellScriptRepository from "@/repositories/repository.shell-scripts";
+import * as shellScriptArgumentRepository from "@/repositories/repository.script-arguments";
+import * as shellScriptEventHandler from "@/eventHandlers/event-handler.shell-script";
+import Output from "@/components/shell-scripts/Output";
+import {STATUS} from "@/models/models.shell-script";
 
-<!--export default {-->
-<!--  name: "Home",-->
-<!--  components: {-->
-<!--    AddShellScript-->
-<!--  },-->
-<!--  data() {-->
-<!--    return {-->
-<!--      scripts: [],-->
-<!--      error: ""-->
-<!--    }-->
-<!--  },-->
-<!--  mounted() {-->
-<!--    shellScriptEventHandler.onExecuteShellScript(this.executeShellScriptCallback())-->
-<!--    shellScriptEventHandler.onKillShellScript(this.killShellScriptCallback());-->
-<!--    this.getScripts();-->
-<!--  },-->
-<!--  methods: {-->
-<!--    saveScript(script) {-->
-<!--      shellScriptRepository.createRecord(script.filePath, script.scriptName);-->
-<!--      this.getScripts();-->
-<!--    },-->
-<!--    async getScripts() {-->
-<!--      this.scripts = await shellScriptRepository.getScripts();-->
-<!--    },-->
-<!--    executeScript(script) {-->
-<!--      if (script.canBeExecuted()) {-->
-<!--        shellScriptEventHandler.sendExecuteShellScript({-->
-<!--          "scriptId": script.id,-->
-<!--          "path": script.filePath,-->
-<!--        })-->
-<!--      }-->
-<!--    },-->
-<!--    stopScript(script) {-->
-<!--      if (script.canBeStopped()) {-->
-<!--        shellScriptEventHandler.sendKillShellScript({-->
-<!--          "scriptId": script.id,-->
-<!--        });-->
-<!--      }-->
-<!--    },-->
-<!--    getScript(id) {-->
-<!--      let script = this.scripts.find(script => script.id === id);-->
+export default {
+  name: "Home",
+  components: {
+    Output
+  },
+  data() {
+    return {
+      scripts: [],
+      error: ""
+    }
+  },
+  mounted() {
+    shellScriptEventHandler.onExecuteShellScript(this.executeShellScriptCallback())
+    shellScriptEventHandler.onKillShellScript(this.killShellScriptCallback());
+    this.getScripts();
+  },
+  methods: {
+    async saveScript(script, argumentArray) {
+      await shellScriptRepository.createRecord(script);
+      const scriptId = await shellScriptRepository.getLastRowId();
 
-<!--      if (!script) {-->
-<!--        this.showError("Script not found!")-->
+      argumentArray.forEach((argument) => {
+        shellScriptArgumentRepository.createRecord(scriptId, argument)
+      })
 
-<!--        return;-->
-<!--      }-->
+      await this.getScripts();
+    },
+    async getScripts() {
+      this.scripts = await shellScriptRepository.getScripts();
+    },
+    executeScript(script) {
+      if (script.canBeExecuted()) {
+        shellScriptEventHandler.sendExecuteShellScript({
+          "scriptId": script.id,
+          "path": script.filePath,
+        })
+      }
+    },
+    stopScript(script) {
+      if (script.canBeStopped()) {
+        shellScriptEventHandler.sendKillShellScript({
+          "scriptId": script.id,
+        });
+      }
+    },
+    getScript(id) {
+      let script = this.scripts.find(script => script.id === id);
 
-<!--      return script;-->
-<!--    },-->
-<!--    executeShellScriptCallback() {-->
-<!--      return payload => {-->
-<!--        let script = this.getScript(payload.scriptId);-->
+      if (!script) {
+        this.showError("Script not found!")
 
-<!--        if (payload.error) {-->
-<!--          this.showError(payload.error);-->
+        return;
+      }
 
-<!--          return;-->
-<!--        }-->
+      return script;
+    },
+    executeShellScriptCallback() {
+      return payload => {
+        let script = this.getScript(payload.scriptId);
 
-<!--        script.status = STATUS.EXECUTING;-->
+        if (payload.error) {
+          this.showError(payload.error);
 
-<!--        if (payload.output) {-->
-<!--          script.output += payload.output;-->
-<!--        }-->
+          return;
+        }
 
-<!--        if (payload.hasExecuted) {-->
-<!--          script.output = "Executed";-->
-<!--          script.status = STATUS.EXECUTED;-->
-<!--        }-->
+        script.status = STATUS.EXECUTING;
 
-<!--        if (payload.isKilled) {-->
-<!--          script.output = "Stopped";-->
-<!--          script.status = STATUS.STOPPED;-->
-<!--        }-->
-<!--      }-->
-<!--    },-->
-<!--    killShellScriptCallback() {-->
-<!--      return payload => {-->
-<!--        let script = this.getScript(payload.scriptId);-->
+        if (payload.output) {
+          script.output += payload.output;
+        }
 
-<!--        if (payload.error) {-->
-<!--          this.showError(payload.error);-->
+        if (payload.hasExecuted) {
+          script.output = "Executed";
+          script.status = STATUS.EXECUTED;
+        }
 
-<!--          return;-->
-<!--        }-->
+        if (payload.isKilled) {
+          script.output = "Stopped";
+          script.status = STATUS.STOPPED;
+        }
+      }
+    },
+    killShellScriptCallback() {
+      return payload => {
+        let script = this.getScript(payload.scriptId);
 
-<!--        script.status = STATUS.STOPPING;-->
-<!--      }-->
-<!--    },-->
-<!--    showError(error) {-->
-<!--      this.error = error;-->
-<!--    },-->
-<!--    editScript(script) {-->
-<!--      return script;-->
-<!--    }-->
-<!--  }-->
-<!--}-->
-<!--</script>-->
+        if (payload.error) {
+          this.showError(payload.error);
+
+          return;
+        }
+
+        script.status = STATUS.STOPPING;
+      }
+    },
+    showError(error) {
+      this.error = error;
+    },
+    editScript(script) {
+      return script;
+    }
+  }
+}
+</script>
 
 <style lang="scss">
-p {
-  margin-bottom: 0 !important;
+.home {
+  padding-left: 40px !important;
 }
 
-#content {
-  width: 100%;
-  padding: 0;
-  min-height: calc(100vh - 30px);
-  transition: all 0.3s;
-  background: #F9F9FC;
+p {
+  margin-bottom: 0 !important;
 }
 
 .btn-circle {
@@ -205,8 +211,8 @@ p {
   position: absolute;
   z-index: 2;
   display: block;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   background: #303030;
   border-radius: 50%;
 }
@@ -237,14 +243,12 @@ p {
 
 .script {
   &__title {
-    font-weight: bold;
-    font-size: 18px;
     margin-top: 40px;
     margin-bottom: 20px !important;
   }
 
   &-container {
-    width: 400px;
+    width: 500px;
     height: 80px;
     background: white;
     border: solid rgba(0, 0, 0, 0.1) 1px;
@@ -252,7 +256,7 @@ p {
   }
 
   &__name {
-    width: 260px;
+    width: 360px;
     padding-left: 18px;
     display: flex;
     align-items: center;

@@ -1,6 +1,6 @@
 import { createWebHistory, createRouter } from "vue-router";
 import Home from "@/components/Home.vue";
-import About from "@/components/About.vue";
+import AddEditShellScript from "@/components/shell-scripts/Add-Edit-Shell-Script";
 
 const routes = [
     {
@@ -9,9 +9,9 @@ const routes = [
         component: Home,
     },
     {
-        path: "/about",
-        name: "About",
-        component: About,
+        path: "/add-edit-shell-script",
+        name: "AddEditShellScript",
+        component: AddEditShellScript,
     },
 ];
 

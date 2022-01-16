@@ -1,5 +1,6 @@
-export class Argument {
+export class ScriptArgument {
     id;
+    scriptId;
     type;
     flagPrefixOption;
     flagPrefixValue;

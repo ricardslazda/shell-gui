@@ -30,6 +30,10 @@ export class ShellScript {
     isStopping() {
         return this.status === STATUS.STOPPING;
     }
+
+    getStatusByName() {
+        return STATUS_NAMES[this.status];
+    }
 }
 
 export const STATUS = Object.freeze({
@@ -48,4 +52,12 @@ export const STATUSES_FOR_EXECUTION = [
 
 export const STATUSES_FOR_STOPPING = [
     STATUS.EXECUTING,
-]
+];
+
+const STATUS_NAMES = Object.freeze({
+    0: "Idle",
+    1: "Executing",
+    2: "Executed",
+    3: "Stopping",
+    4: "Stopped"
+})
