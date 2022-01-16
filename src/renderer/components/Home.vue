@@ -1,49 +1,82 @@
 <template>
-  <div id="content" style="background: #F9F9FC">
+  <div id="content">
+    <div class="container">
+      <p class="script__title">
+        Scripts
+      </p>
+      <div class="script-container">
+        <div class="script__name">
+          <p class="script__name-text">
+            Run my script
+          </p>
+        </div>
+        <div class="script__actions">
+          <div class="script__status-container">
+            <div>
+              <p class="script__status-badge">
+                <i class="fas fa-check-circle script__status-badge-icon"></i>
+                Executed
+              </p>
+            </div>
+          </div>
+          <div class="script__actions-container">
+            <a href="#" class="script__actions-icon">
+              <i class="fas fa-pen"></i>
+            </a>
+            <a href="#" class="script__actions-icon">
+              <i class="fas fa-play"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+  <a href="#" class="btn-circle"></a>
 </template>
 
-<!--<template ref="homeRef">-->
-<!--  <div class="container">-->
-<!--    <div class="row">-->
-<!--      <div class="col-4">-->
-<!--        <div>-->
-<!--          <div v-for="script in scripts" v-bind:key="script.id">-->
-<!--            <div>-->
-<!--              <p>-->
-<!--                {{ script.scriptName }}-->
-<!--              </p>-->
-<!--              <p v-if="script.output">-->
-<!--                {{ script.output }}-->
-<!--              </p>-->
-<!--            </div>-->
-<!--            <div>-->
-<!--              <button type="button" class="btn btn-primary" @click="executeScript(script)">-->
-<!--                Run-->
-<!--              </button>-->
-<!--              <button type="button" :class="['btn btn-danger', {'disabled' : script.isStopping()}]"-->
-<!--                      @click="stopScript(script)">-->
-<!--                Stop-->
-<!--              </button>-->
-<!--              <button class="btn btn-info" @click="editScript(script)">-->
-<!--                Edit-->
-<!--              </button>-->
+<!--<template>-->
+<!--  <div id="content" style="background: #F9F9FC">-->
+<!--    <div class="container">-->
+<!--      <div class="row">-->
+<!--        <div class="col-4">-->
+<!--          <div>-->
+<!--            <div v-for="script in scripts" v-bind:key="script.id">-->
+<!--              <div>-->
+<!--                <p>-->
+<!--                  {{ script.scriptName }}-->
+<!--                </p>-->
+<!--                <p v-if="script.output">-->
+<!--                  {{ script.output }}-->
+<!--                </p>-->
+<!--              </div>-->
+<!--              <div>-->
+<!--                <button type="button" class="btn btn-primary" @click="executeScript(script)">-->
+<!--                  Run-->
+<!--                </button>-->
+<!--                <button type="button" :class="['btn btn-danger', {'disabled' : script.isStopping()}]"-->
+<!--                        @click="stopScript(script)">-->
+<!--                  Stop-->
+<!--                </button>-->
+<!--                <button class="btn btn-info" @click="editScript(script)">-->
+<!--                  Edit-->
+<!--                </button>-->
+<!--              </div>-->
 <!--            </div>-->
 <!--          </div>-->
 <!--        </div>-->
+<!--        <div class="col-6">-->
+<!--          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addShellScriptModal">-->
+<!--            Add Script-->
+<!--          </button>-->
+<!--        </div>-->
+<!--        <p v-if="this.error">-->
+<!--          {{ this.error }}-->
+<!--        </p>-->
 <!--      </div>-->
-<!--      <div class="col-6">-->
-<!--        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addShellScriptModal">-->
-<!--          Add Script-->
-<!--        </button>-->
-<!--      </div>-->
-<!--      <p v-if="this.error">-->
-<!--        {{ this.error }}-->
-<!--      </p>-->
 <!--    </div>-->
-<!--  </div>-->
-<!--  <div>-->
-<!--    <AddShellScript @script-saved="saveScript"/>-->
+<!--    <div>-->
+<!--      <AddShellScript @script-saved="saveScript"/>-->
+<!--    </div>-->
 <!--  </div>-->
 <!--</template>-->
 
@@ -153,11 +186,127 @@
 <!--}-->
 <!--</script>-->
 
-<style>
+<style lang="scss">
+p {
+  margin-bottom: 0 !important;
+}
+
 #content {
   width: 100%;
   padding: 0;
   min-height: calc(100vh - 30px);
   transition: all 0.3s;
+  background: #F9F9FC;
+}
+
+.btn-circle {
+  bottom: 40px;
+  right: 40px;
+  position: absolute;
+  z-index: 2;
+  display: block;
+  width: 70px;
+  height: 70px;
+  background: #303030;
+  border-radius: 50%;
+}
+
+.btn-circle:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.btn-circle:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: 4px;
+  height: 40px;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.script {
+  &__title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 40px;
+    margin-bottom: 20px !important;
+  }
+
+  &-container {
+    width: 400px;
+    height: 80px;
+    background: white;
+    border: solid rgba(0, 0, 0, 0.1) 1px;
+    display: flex;
+  }
+
+  &__name {
+    width: 260px;
+    padding-left: 18px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    &-text {
+      margin: 0;
+    }
+  }
+
+  &__actions {
+    &-container {
+      width: 140px;
+      display: flex;
+      justify-content: flex-end;
+      padding-right: 10px;
+      align-items: center;
+      height: 45px;
+      font-size: 20px;
+    }
+
+    &-icon {
+      color: #303030;
+      margin-right: 12px;
+
+      &:first-child {
+        margin-right: 18px;
+      }
+    }
+  }
+
+  &__status {
+    &-container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding-right: 10px;
+      height: 35px;
+    }
+
+    &-badge {
+      background: #EDEDED;
+      color: #303030;
+      border-radius: 10px;
+      padding: 2px 10px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+
+      &-icon {
+        margin-right: 6px;
+        color: green;
+      }
+    }
+  }
 }
 </style>

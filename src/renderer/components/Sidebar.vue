@@ -26,9 +26,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $font-color: #303030;
-
 a {
   color: $font-color;
   text-decoration: none !important;
