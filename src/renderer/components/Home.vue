@@ -19,6 +19,11 @@
             </div>
           </div>
           <div class="script__actions-container">
+            <a href="#" class="script__actions-icon-pen">
+              <router-link :to="{ name: 'AddEditShellScript', params: {scriptId: script.id}}">
+                <i class="fas fa-pen"></i>
+              </router-link>
+            </a>
             <a href="#" class="script__actions-icon" data-bs-toggle="modal" data-bs-target="#scriptOutput">
               <i class="fas fa-table"></i>
             </a>
@@ -188,9 +193,6 @@ export default {
     },
     showError(error) {
       this.error = error;
-    },
-    editScript(script) {
-      return script;
     }
   }
 }
@@ -281,6 +283,11 @@ p {
     &-icon {
       color: #303030;
       margin-right: 12px;
+
+      &-pen {
+        margin-right: 8px;
+        color: #303030;
+      }
 
       &:first-child {
         margin-right: 18px;

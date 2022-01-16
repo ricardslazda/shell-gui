@@ -28,6 +28,10 @@ export async function getLastRowId() {
     return await window.dao.all('SELECT last_insert_rowid();');
 }
 
+export async function getById(id) {
+    return await window.dao.get('SELECT * FROM shell_scripts WHERE id = ?', [id]);
+}
+
 export async function getScripts()
 {
     let scriptsArray = [];

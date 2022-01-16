@@ -1,6 +1,6 @@
 <template>
   <div class="container add-edit">
-    <h3 class="form__header">New Script</h3>
+    <h3 class="form__header">{{ isEditing ? "Edit" : "New" }} Script</h3>
     <hr/>
     <div class="form__wrapper">
       <form>
@@ -13,7 +13,7 @@
           <label class="form-label">Script name*</label>
           <input type="text" class="form-control" v-model="script.scriptName">
         </div>
-        <div class="mb-3 form-group">
+        <div class="mb-3 form-group" v-if="!isEditing">
           <label class="form-label">File path*</label>
           <input class="form-control" type="file" ref="file" @change="handleFileUpload()">
         </div>
@@ -82,9 +82,10 @@
 <script type="module">
 import {ShellScript} from "@/models/models.shell-script";
 import {ScriptArgument, FLAG_PREFIX_OPTIONS, FLAG_MIDDLE_SYNTAX_LIST, TYPES} from "@/models/models.script-argument";
+import * as shellScriptRepository from "@/repositories/repository.shell-scripts";
 
 export default {
-  name: "AddShellScript",
+  name: "AddEditShellScript",
   data() {
     return {
       script: {},
@@ -94,15 +95,15 @@ export default {
     }
   },
   props: {
-    scriptProp: ShellScript
+    scriptId: String
   },
-  mounted() {
+  async mounted() {
     this.constants.FLAG_PREFIX_OPTIONS = FLAG_PREFIX_OPTIONS;
     this.constants.FLAG_MIDDLE_SYNTAX_LIST = FLAG_MIDDLE_SYNTAX_LIST;
     this.constants.TYPES = TYPES;
 
-    if (this.scriptProp) {
-      this.script = this.scriptProp;
+    if (this.scriptId) {
+      this.script = await this.getScriptById(this.scriptId);
       this.argumentArray = [];
     } else {
       this.script = new ShellScript();
@@ -110,7 +111,9 @@ export default {
     }
   },
   computed: {
-    isEditing: () => this.scriptProp,
+    isEditing: function () {
+      return this.scriptId !== undefined;
+    }
   },
   methods: {
     handleFileUpload() {
@@ -124,6 +127,9 @@ export default {
     },
     addArgument() {
       this.argumentArray.push(new ScriptArgument())
+    },
+    async getScriptById(id) {
+      return await shellScriptRepository.getById(id);
     }
   }
 }
@@ -204,7 +210,6 @@ export default {
   }
 }
 
-/* The switch - the box around the slider */
 .switch {
   position: relative;
   display: inline-block;
@@ -255,7 +260,6 @@ input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-/* Rounded sliders */
 .slider.round {
   border-radius: 34px;
 }

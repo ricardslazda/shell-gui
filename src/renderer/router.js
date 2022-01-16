@@ -12,6 +12,7 @@ const routes = [
         path: "/add-edit-shell-script",
         name: "AddEditShellScript",
         component: AddEditShellScript,
+        props: true,
     },
 ];
 
