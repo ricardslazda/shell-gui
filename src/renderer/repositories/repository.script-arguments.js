@@ -24,3 +24,11 @@ export function createRecord(scriptId, argument)
         'INSERT INTO script_arguments (script_id, type, flag_prefix_option, flag_prefix_value, flag_middle_syntax_option, flag_argument_value, positional_argument_value) VALUES (?,?,?,?,?,?,?)',
         [scriptId, argument.type, argument.flagPrefixOption, argument.flagPrefixValue, argument.flagMiddleSyntaxOption, argument.flagArgumentValue, argument.positionalArgumentValue])
 }
+
+export async function getByScriptId(scriptId) {
+    return await window.dao.all('SELECT * FROM script_arguments WHERE script_id = ?', [scriptId]);
+}
+
+export async function deleteAllByScriptId(scriptId) {
+    return await window.dao.all('DELETE FROM script_arguments WHERE script_id = ?', [scriptId]);
+}

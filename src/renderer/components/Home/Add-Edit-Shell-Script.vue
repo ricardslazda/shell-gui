@@ -1,5 +1,5 @@
 <template>
-  <div class="container add-edit">
+  <div class="container add-edit" v-if="!isLoading">
     <h3 class="form__header">{{ isEditing ? "Edit" : "New" }} Script</h3>
     <hr/>
     <div class="form__wrapper">
@@ -21,25 +21,22 @@
           <label class="form-check-label form__arguments-text">Arguments</label>
           <label class="switch">
             <input type="checkbox" v-model="hasArguments">
-            <span class="slider round"></span>
+            <span :class="['slider', 'round', {'slider--active': hasArguments}]"></span>
           </label>
         </div>
         <div v-if="hasArguments" class="mb-3">
           <div class="row" v-for="(argument, index) in this.argumentArray" :key="index">
             <div class="col-4">
-<!--              <label for="inputState" class="form-label">Type</label>-->
               <select id="inputState" class="form-select" v-model="argument.type">
                 <option v-for="(TYPE, index) in this.constants.TYPES" :key="index">{{ TYPE }}</option>
               </select>
             </div>
             <div class="col-6">
               <div v-if="argument.type === this.constants.TYPES.POSITIONAL" class="mb-3">
-<!--                <label for="inputPositionalArgument" class="form-label">Argument</label>-->
                 <input type="text" class="form-control" id="inputPositionalArgument"
                        v-model="argument.positionalArgumentValue">
               </div>
               <div v-else-if="argument.type === this.constants.TYPES.FLAG">
-<!--                <label for="inputFlag" class="form-label">Argument</label>-->
                 <div class="input-group mb-3">
                   <select class="form-select input-group-text" v-model="argument.flagPrefixOption">
                     <option v-for="(FLAG_PREFIX_OPTION, index) in this.constants.FLAG_PREFIX_OPTIONS" :key="index">
@@ -57,8 +54,6 @@
               </div>
             </div>
             <div class="col-2">
-<!--              <label class="form-label" for="removeArgument">Remove</label>-->
-<!--              <button class="btn btn-danger" id="removeArgument" @click.prevent="removeArgument(index)">-</button>-->
               <button type="button" class="btn form__add-button" @click="removeArgument(index)">-</button>
             </div>
           </div>
@@ -70,10 +65,8 @@
         </div>
       </form>
       <div class="form__save-container">
-        <router-link to="/">
-          <a href="" class="form__back-link">Go back</a>
-        </router-link>
-        <button type="button" class="btn form__save-button" data-bs-dismiss="modal" @click="saveShellScript">Save</button>
+        <a href="#" class="form__back-link" @click="this.$emit('back')">Go back</a>
+        <button type="button" class="btn form__save-button" @click="handleSave">Save</button>
       </div>
     </div>
   </div>
@@ -83,6 +76,7 @@
 import {ShellScript} from "@/models/models.shell-script";
 import {ScriptArgument, FLAG_PREFIX_OPTIONS, FLAG_MIDDLE_SYNTAX_LIST, TYPES} from "@/models/models.script-argument";
 import * as shellScriptRepository from "@/repositories/repository.shell-scripts";
+import * as shellScriptArgumentRepository from "@/repositories/repository.script-arguments";
 
 export default {
   name: "AddEditShellScript",
@@ -91,47 +85,104 @@ export default {
       script: {},
       argumentArray: null,
       hasArguments: false,
-      constants: {}
+      isLoading: true,
+      constants: {},
     }
   },
   props: {
-    scriptId: String
+    scriptId: Number,
   },
   async mounted() {
     this.constants.FLAG_PREFIX_OPTIONS = FLAG_PREFIX_OPTIONS;
     this.constants.FLAG_MIDDLE_SYNTAX_LIST = FLAG_MIDDLE_SYNTAX_LIST;
     this.constants.TYPES = TYPES;
 
-    if (this.scriptId) {
+    if (this.isEditing) {
       this.script = await this.getScriptById(this.scriptId);
-      this.argumentArray = [];
-    } else {
+      this.argumentArray = await this.getArgumentsByScriptId(this.scriptId);
+
+      if (this.argumentArray.length !== 0) {
+        this.hasArguments = true;
+      }
+
+      if (!this.argumentArray) {
+        this.argumentArray = [new ScriptArgument()];
+        this.hasArguments = false;
+      }
+
+    }
+
+    if (!this.isEditing) {
       this.script = new ShellScript();
       this.argumentArray = [new ScriptArgument()];
     }
+
+    this.isLoading = false;
   },
   computed: {
     isEditing: function () {
       return this.scriptId !== undefined;
+    },
+  },
+  watch: {
+    hasArguments: function (newVal, oldVal) {
+      if (oldVal === false && this.argumentArray.length === 0) {
+        this.argumentArray = [new ScriptArgument()];
+      }
     }
   },
   methods: {
     handleFileUpload() {
       this.script.filePath = this.$refs.file.files[0];
     },
-    saveShellScript() {
-      this.$emit("script-saved", this.script, this.argumentArray)
+    async handleSave() {
+      if (this.isEditing) {
+        await this.editScript();
+      } else {
+        await this.saveScript();
+      }
+
+      this.$emit("script-saved");
+
+    },
+    async editScript() {
+      await shellScriptRepository.editScript(this.script);
+      await shellScriptArgumentRepository.deleteAllByScriptId(this.scriptId);
+
+      if (this.hasArguments) {
+        this.argumentArray.forEach((argument) => {
+          shellScriptArgumentRepository.createRecord(this.scriptId, argument)
+        })
+      }
+    },
+    async saveScript() {
+      await shellScriptRepository.createRecord(this.script);
+      const lastRowIdObject = await shellScriptRepository.getLastRowId();
+      const scriptId = lastRowIdObject[0].lastInsertRowid;
+
+      if (this.hasArguments) {
+        this.argumentArray.forEach((argument) => {
+          shellScriptArgumentRepository.createRecord(scriptId, argument)
+        })
+      }
     },
     removeArgument(index) {
       this.argumentArray.splice(index, 1);
+
+      if (this.argumentArray.length < 1) {
+        this.hasArguments = false;
+      }
     },
     addArgument() {
       this.argumentArray.push(new ScriptArgument())
     },
     async getScriptById(id) {
       return await shellScriptRepository.getById(id);
+    },
+    async getArgumentsByScriptId(scriptId) {
+      return await shellScriptArgumentRepository.getByScriptId(scriptId);
     }
-  }
+  },
 }
 </script>
 
@@ -173,7 +224,7 @@ export default {
 
     &-button {
       border-radius: 10px;
-      background: #303030;
+      background: #2196F3;
       color: white;
 
       &:hover {
@@ -247,17 +298,13 @@ export default {
   transition: .4s;
 }
 
-input:checked + .slider {
+.slider--active {
   background-color: #2196F3;
-}
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .slider:before {
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  &.slider:before {
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
 }
 
 .slider.round {

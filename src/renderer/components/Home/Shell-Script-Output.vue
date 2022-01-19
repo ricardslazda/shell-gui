@@ -22,7 +22,7 @@
 
 <script>
 export default {
-  name: "Output",
+  name: "ShellScriptOutputModal",
   props: {
     output: Array
   }

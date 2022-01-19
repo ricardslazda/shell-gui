@@ -14,8 +14,8 @@
       </li>
     </ul>
 
-    <div class="footer">
-      <img src="../../assets/logo.svg" alt="logo" class="footer__image">
+    <div class="footer d-none">
+      <img src="../../assets/images/logo.svg" alt="logo" class="footer__image">
     </div>
   </nav>
 </template>
@@ -89,6 +89,7 @@ a {
     height: 60px;
     margin-bottom: 50px;
     margin-left: 10px;
+    opacity: .3;
   }
 }
 

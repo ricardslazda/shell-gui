@@ -8,6 +8,7 @@
   </div>
 </template>
 <script>
+
 import Menubar from "@/components/Menubar";
 import Sidebar from "@/components/Sidebar.vue"
 
@@ -17,14 +18,14 @@ export default {
 </script>
 
 <style lang="scss">
-p,a,h1,h2,h3,body {
-  font-family: "Lato", sans-serif;
+body {
+  font-family: "Lato", sans-serif !important;
+  color: #303030;
 }
+
 #content {
   width: 100%;
-  padding: 0;
   min-height: calc(100vh - 30px);
-  transition: all 0.3s;
   background: #F9F9FC;
 }
 

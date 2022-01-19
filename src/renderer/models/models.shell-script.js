@@ -5,6 +5,7 @@ export class ShellScript {
     filePath;
     status = STATUS.IDLE;
     createdAt;
+    updatedAt;
     lastExecutedAt;
 
     /** Additional Properties **/
@@ -16,6 +17,7 @@ export class ShellScript {
         this.scriptName = properties.scriptName;
         this.filePath = properties.filePath;
         this.createdAt = properties.createdAt;
+        this.updatedAt = properties.updatedAt;
         this.lastExecutedAt = properties.lastExecutedAt;
     }
 
